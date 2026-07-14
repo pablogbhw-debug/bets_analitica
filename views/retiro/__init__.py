@@ -1,0 +1,1 @@
+"""Módulo Registrar retiro."""
