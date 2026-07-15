@@ -9,6 +9,15 @@ from models.database import (
 )
 from controllers.analitica_resumen import analizar_rendimiento_psicologico
 
+
+def calcular_rollover_recarga(casa, monto_deposito, monto_bono):
+    """Calcula el rollover estimado sin duplicar la regla financiera en la vista."""
+    return round(
+        float(monto_deposito) * float(casa["rollover_deposito"])
+        + float(monto_bono) * float(casa["rollover_bono"]),
+        2,
+    )
+
 def recomendar_recarga_bitacora():
     """Sugiere exposición adicional solo desde resultados positivos, sin bloquear decisiones."""
     _, metricas = analizar_rendimiento_psicologico()

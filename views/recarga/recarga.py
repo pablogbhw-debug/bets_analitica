@@ -44,9 +44,8 @@ def mostrar(casas):
         st.markdown(f"**La recarga se registrará únicamente en: {casa['nombre_casa']} ({casa['id']})**")
         monto_deposito = st.number_input("Monto depositado", min_value=0.0, step=5.0, format="%.2f")
         monto_bono = st.number_input("Bono recibido", min_value=0.0, step=5.0, format="%.2f")
-        rollover_estimado = (
-            monto_deposito * float(casa["rollover_deposito"])
-            + monto_bono * float(casa["rollover_bono"])
+        rollover_estimado = analitica.calcular_rollover_recarga(
+            casa, monto_deposito, monto_bono
         )
         st.info(f"Esta operación agregará {dinero(rollover_estimado)} de rollover pendiente.")
         acepta_riesgo = st.checkbox(

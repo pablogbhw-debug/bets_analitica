@@ -13,10 +13,11 @@ ARQUITECTURA MVC
 4. app.py: composición e inicio; no contiene reglas financieras.
 5. test_sistema.py: pruebas de integración que importan directamente models/ y controllers/.
 
-MySQL usa MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD y MYSQL_DATABASE.
+MySQL carga MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD y MYSQL_DATABASE desde `.env`.
 MySQL es el único motor de persistencia de la aplicación.
-Cada cuenta usa un almacén MySQL privado derivado de MYSQL_DATABASE y su id de usuario;
-casas, configuración, apuestas, movimientos, saldos y analítica no se comparten.
+Todas las entidades financieras incluyen `usuario_id` y llaves foráneas hacia `usuarios`.
+Cada consulta filtra el usuario autenticado; casas, configuración, apuestas, movimientos,
+saldos y analítica no se comparten entre cuentas.
 
 EVIDENCIAS DEL SÍLABO
 - Estructurado: flujo de módulos, formularios, if/elif/else y bucles for.
@@ -73,7 +74,7 @@ ALERTAS
 
 INSTALACIÓN Y EJECUCIÓN
 1. pip install -r requirements.txt
-2. Configurar MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD y MYSQL_DATABASE.
+2. Copiar `.env.example` como `.env` y configurar las credenciales MySQL.
 3. El usuario indicado debe poder crear la base si todavía no existe.
 4. streamlit run app.py
 

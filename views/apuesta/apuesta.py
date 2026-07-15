@@ -3,8 +3,7 @@ from datetime import date
 import streamlit as st
 
 from controllers import analitica_apuesta as analitica
-from controllers.transacciones import registrar_apuesta_bitacora
-from models.entidades import RegistroApuesta
+from controllers.transacciones import registrar_apuesta_desde_formulario
 from views.componentes import dinero, guardar_mensaje_y_limpiar, selector_casa
 
 
@@ -78,13 +77,9 @@ def mostrar(casas):
         )
     if guardar:
         try:
-            # Mercado y selección permanecen separados en el modelo relacional.
-            apuesta = RegistroApuesta(casa["id"], monto, origen, cuota, deporte, liga,
-                                      evento, "BITACORA", detalle_apuesta, fecha_evento)
-            apuesta_id = registrar_apuesta_bitacora(
-                apuesta.id_casa, apuesta.deporte, apuesta.liga, apuesta.evento,
-                apuesta.mercado, apuesta.seleccion, apuesta.fecha_evento,
-                apuesta.monto, apuesta.cuota, apuesta.tipo_saldo, resultado_apuesta,
+            apuesta_id = registrar_apuesta_desde_formulario(
+                casa["id"], monto, origen, cuota, deporte, liga, evento,
+                "BITACORA", detalle_apuesta, fecha_evento, resultado_apuesta,
             )
             avisos = []
             if monto > recomendacion["monto"]:

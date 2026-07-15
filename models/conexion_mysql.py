@@ -6,22 +6,25 @@ import threading
 from contextlib import contextmanager
 
 import mysql.connector
+from dotenv import load_dotenv
 from mysql.connector.pooling import MySQLConnectionPool
 
+
+load_dotenv()
 
 _pools = {}
 _lock = threading.Lock()
 
 
 def _configuracion(base_datos=None):
-    base = base_datos or os.getenv("MYSQL_DATABASE", "apuestas_analitica")
+    base = base_datos or os.getenv("MYSQL_DATABASE", "apuestas_analitica_multiusuario")
     if not re.fullmatch(r"[A-Za-z0-9_]+", base):
         raise ValueError("MYSQL_DATABASE solo admite letras, números y guion bajo.")
     return base, {
         "host": os.getenv("MYSQL_HOST", "localhost"),
         "port": int(os.getenv("MYSQL_PORT", "3306")),
         "user": os.getenv("MYSQL_USER", "root"),
-        "password": os.getenv("MYSQL_PASSWORD", "pwx1008184"),
+        "password": os.getenv("MYSQL_PASSWORD", ""),
         "autocommit": False,
     }
 

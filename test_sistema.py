@@ -79,24 +79,35 @@ class SistemaApuestasTest(unittest.TestCase):
 
     def setUp(self):
         os.environ["MYSQL_DATABASE"] = os.environ["MYSQL_TEST_DATABASE"]
-        database.establecer_usuario_actual(1)
         database.inicializar_db()
+        with database.obtener_conexion_global() as conn:
+            conn.execute("""INSERT IGNORE INTO usuarios
+                (id,nombre,correo,password_hash) VALUES
+                (1,'Usuario Test 1','test1@example.com',REPEAT('x',60)),
+                (2,'Usuario Test 2','test2@example.com',REPEAT('y',60))""")
+        database.establecer_usuario_actual(1)
         database.reiniciar_datos_conservando_casas()
         database.registrar_casa_apuesta("TEST", "Casa Test", 20, 1, 2, 1.20, "Fútbol,Tenis")
+        database.actualizar_casa("TEST", 20, 1, 2, 1.20, "Fútbol,Tenis")
         database.actualizar_configuracion(500, 200, 50, 100, True)
 
     def test_datos_financieros_son_independientes_por_usuario(self):
         database.registrar_recarga_bitacora("TEST", 25)
+        apuesta_id = database.registrar_apuesta_bitacora(
+            "TEST", "Fútbol", "Liga", "A vs B", "BITACORA", "A",
+            date.today(), 10, 2, "DEPOSITO", "PENDIENTE",
+        )
 
         database.establecer_usuario_actual(2)
-        database.inicializar_db()
         database.inicializar_casas_predeterminadas(forzar=True)
         self.assertIsNone(database.obtener_casa("TEST"))
         self.assertEqual(database.obtener_historial_completo(), [])
+        with self.assertRaisesRegex(ValueError, "no existe"):
+            database.resolver_apuesta(apuesta_id, "PERDIDA")
 
         database.establecer_usuario_actual(1)
         self.assertEqual(database.obtener_casa("TEST")["saldo_deposito"], 25)
-        self.assertEqual(len(database.obtener_historial_completo()), 1)
+        self.assertEqual(len(database.obtener_historial_completo()), 2)
 
     def test_apuesta_pendiente_y_ganada(self):
         database.registrar_movimiento_bd("TEST", "RECARGA", 100)
@@ -382,7 +393,8 @@ class SistemaApuestasTest(unittest.TestCase):
             date.today(), 20, 2, "DEPOSITO", "PERDIDA"
         )
         with database.obtener_conexion() as conn:
-            conn.execute("UPDATE apuestas SET monto_conciliado=0 WHERE id=?", (apuesta_id,))
+            conn.execute("UPDATE apuestas SET monto_conciliado=0 WHERE usuario_id=? AND id=?",
+                         (database.obtener_usuario_actual(), apuesta_id))
         auditoria = analitica_resumen.auditar_conciliacion_historial()
         self.assertFalse(auditoria["confiable_saldos"])
         self.assertEqual(auditoria["monto_sin_conciliar"], 20)
@@ -390,7 +402,9 @@ class SistemaApuestasTest(unittest.TestCase):
     def test_origen_saldo_combina_deposito_y_retirable_sin_usar_bono(self):
         database.registrar_recarga_bitacora("TEST", 10, 50)
         with database.obtener_conexion() as conn:
-            conn.execute("UPDATE casas_apuestas SET saldo_retirable=15 WHERE id='TEST'")
+            conn.execute("""UPDATE casas_apuestas SET saldo_retirable=15
+                         WHERE usuario_id=? AND id='TEST'""",
+                         (database.obtener_usuario_actual(),))
         apuesta_id = database.registrar_apuesta_bitacora(
             "TEST", "Fútbol", "Liga", "A vs B", "BITACORA", "A",
             date.today(), 20, 2, "SALDO", "PERDIDA"
