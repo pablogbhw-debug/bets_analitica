@@ -10,6 +10,7 @@ from models.database import obtener_conexion_global
 
 
 def buscar_usuario_por_correo(correo):
+    """Busca y devuelve un usuario registrado mediante su correo normalizado."""
     with obtener_conexion_global() as conexion:
         fila = conexion.execute(
             "SELECT id,nombre,correo,password_hash,activo FROM usuarios WHERE correo=?",
@@ -46,6 +47,7 @@ def crear_sesion_usuario(usuario_id, dias=7):
 
 
 def buscar_usuario_por_sesion(token):
+    """Valida el token de sesión y devuelve el usuario asociado."""
     if not token or not isinstance(token, str) or len(token) > 200:
         return None
     token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
@@ -60,6 +62,7 @@ def buscar_usuario_por_sesion(token):
 
 
 def eliminar_sesion_usuario(token):
+    """Elimina una sesión persistente usando el hash seguro de su token."""
     if not token or not isinstance(token, str):
         return
     token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()

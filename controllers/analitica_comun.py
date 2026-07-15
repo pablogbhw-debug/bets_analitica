@@ -4,6 +4,7 @@ import pandas as pd
 from models.database import fecha_utc_a_local, obtener_apuestas, obtener_historial_completo
 
 def _racha_perdidas(resultados):
+    """Calcula la mayor racha consecutiva de resultados perdidos."""
     racha = 0
     for resultado in reversed(list(resultados)):
         if resultado != "PERDIDA":
@@ -69,4 +70,5 @@ def _apuestas_liquidadas():
     return df
 
 def _alerta(codigo, nivel, mensaje):
+    """Construye una alerta estructurada con código, nivel y mensaje."""
     return {"codigo": codigo, "nivel": nivel, "mensaje": mensaje}

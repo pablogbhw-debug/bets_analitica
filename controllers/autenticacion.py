@@ -18,10 +18,12 @@ HASH_FICTICIO = b"$2b$12$C6UzMDM.H6dfI/f/IKcEe.ou7tHZQ1XH4mOaP38YI2Ca8b7fV8x.q"
 
 
 def normalizar_correo(correo):
+    """Limpia y convierte el correo a un formato uniforme para comparaciones."""
     return str(correo).strip().lower()
 
 
 def registrar_usuario(nombre, correo, password, confirmacion):
+    """Valida los datos y crea una nueva cuenta de usuario."""
     nombre = " ".join(str(nombre).strip().split())
     correo = normalizar_correo(correo)
     if len(nombre) < 2:
@@ -45,6 +47,7 @@ def registrar_usuario(nombre, correo, password, confirmacion):
 
 
 def autenticar_usuario(correo, password):
+    """Comprueba las credenciales y devuelve el usuario autenticado."""
     correo = normalizar_correo(correo)
     usuario = buscar_usuario_por_correo(correo) if PATRON_CORREO.fullmatch(correo) else None
     hash_guardado = usuario["password_hash"].encode("utf-8") if usuario else HASH_FICTICIO
@@ -55,12 +58,15 @@ def autenticar_usuario(correo, password):
 
 
 def iniciar_sesion_persistente(usuario):
+    """Crea y devuelve un token para mantener iniciada la sesión."""
     return crear_sesion_usuario(usuario["id"])
 
 
 def restaurar_sesion(token):
+    """Recupera un usuario a partir de un token de sesión vigente."""
     return buscar_usuario_por_sesion(token)
 
 
 def cerrar_sesion(token):
+    """Elimina el token indicado para cerrar la sesión persistente."""
     eliminar_sesion_usuario(token)

@@ -4,6 +4,7 @@ import pandas as pd
 import streamlit as st
 
 def dinero(valor):
+    """Formatea un valor numérico como importe monetario en soles."""
     return f"S/ {float(valor):,.2f}"
 
 def guardar_mensaje_y_limpiar(mensaje, claves=()):
@@ -75,6 +76,7 @@ def tabla_financiera(tabla):
     return estilo
 
 def selector_casa(casas, clave, etiqueta="Casa de apuestas", detener_si_vacia=True):
+    """Muestra un selector de casas y devuelve la opción elegida."""
     opciones = {f"{c['nombre_casa']} ({c['id']})": c for c in casas}
     seleccion = st.selectbox(
         etiqueta, list(opciones), index=None,

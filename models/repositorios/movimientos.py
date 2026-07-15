@@ -6,6 +6,7 @@ from models.repositorios.historial import retiro_permitido
 
 
 def registrar_movimiento_bd(id_casa, tipo, monto, cuota=1, saldo_usado="DEPOSITO"):
+    """Registra un movimiento financiero y actualiza la billetera correspondiente."""
     usuario_id = obtener_usuario_actual()
     id_casa, tipo = id_casa.upper().strip(), tipo.upper().strip()
     saldo_usado = saldo_usado.upper().strip()
@@ -62,6 +63,7 @@ def registrar_movimiento_bd(id_casa, tipo, monto, cuota=1, saldo_usado="DEPOSITO
 
 
 def registrar_recarga_bitacora(id_casa, monto_deposito, monto_bono=0):
+    """Registra depósito y bono por separado y actualiza el rollover."""
     usuario_id = obtener_usuario_actual()
     id_casa = id_casa.upper().strip()
     monto_deposito, monto_bono = float(monto_deposito), float(monto_bono)

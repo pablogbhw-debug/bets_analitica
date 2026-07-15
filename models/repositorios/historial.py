@@ -4,6 +4,7 @@ from models.repositorios.conexion import MINIMO_RETIRO, obtener_conexion, obtene
 
 
 def obtener_historial_completo():
+    """Consulta la bitácora completa de movimientos del usuario."""
     usuario_id = obtener_usuario_actual()
     with obtener_conexion() as conn:
         return [dict(f) for f in conn.execute("""
@@ -15,15 +16,18 @@ def obtener_historial_completo():
 
 
 def retiro_permitido(casa):
+    """Indica si una casa cumple saldo mínimo y rollover para retirar."""
     minimo = float(casa.get("minimo_retiro", MINIMO_RETIRO))
     return float(casa["saldo_retirable"]) >= minimo and float(casa["rollover_pendiente"]) <= 0
 
 
 def saldo_jugable(casa):
+    """Calcula el saldo total disponible para realizar apuestas en una casa."""
     return sum(float(casa[k]) for k in ("saldo_deposito", "saldo_bono", "saldo_retirable"))
 
 
 def recalcular_rollover_casa(id_casa):
+    """Reconstruye y actualiza el rollover pendiente de una casa."""
     usuario_id = obtener_usuario_actual()
     id_casa = id_casa.upper().strip()
     with obtener_conexion() as conn:
@@ -57,6 +61,7 @@ def recalcular_rollover_casa(id_casa):
 
 
 def diagnosticar_ciclo(casa):
+    """Explica las condiciones que permiten o bloquean un retiro."""
     jugable, retirable = saldo_jugable(casa), float(casa["saldo_retirable"])
     minimo = float(casa.get("minimo_retiro", MINIMO_RETIRO))
     rollover = float(casa["rollover_pendiente"])
@@ -88,4 +93,5 @@ def diagnosticar_ciclo(casa):
 
 
 def recalcular_saldos_desde_historial():
+    """Reconstruye los saldos de las casas usando el historial registrado."""
     raise ValueError("La reconstrucción automática está desactivada.")

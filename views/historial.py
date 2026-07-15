@@ -12,6 +12,7 @@ from views.componentes import tabla_financiera
 
 
 def mostrar(casas):
+    """Muestra la vista de historial y gestiona sus interacciones."""
     st.header("Historial de la bitácora")
     apuestas = obtener_apuestas()
     movimientos = obtener_historial_completo()

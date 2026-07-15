@@ -6,6 +6,7 @@ from views.componentes import dinero, guardar_mensaje_y_limpiar, selector_casa
 
 
 def mostrar(casas):
+    """Muestra la vista de recarga y gestiona sus interacciones."""
     st.header("Registrar una recarga")
     casa = selector_casa(casas, "casa_recarga")
     resumen_casa = analitica.resumen_financiero_casa(casa["id"])

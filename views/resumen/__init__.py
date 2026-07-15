@@ -1,1 +1,0 @@
-"""Módulo Resumen y análisis."""

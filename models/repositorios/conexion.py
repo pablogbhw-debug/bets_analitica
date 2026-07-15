@@ -24,6 +24,7 @@ def establecer_usuario_actual(usuario_id):
 
 
 def obtener_usuario_actual(requerido=True):
+    """Devuelve el usuario asociado al contexto actual de ejecución."""
     usuario_id = _usuario_actual.get()
     if requerido and usuario_id is None:
         raise PermissionError("Debes iniciar sesión para acceder a estos datos.")
@@ -59,6 +60,7 @@ def normalizar_fecha_evento(valor):
 
 @contextmanager
 def obtener_conexion():
+    """Proporciona una conexión transaccional y confirma o revierte sus cambios."""
     conn = ConexionMySQL()
     try:
         yield conn

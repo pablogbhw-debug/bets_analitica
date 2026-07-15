@@ -17,6 +17,7 @@ _lock = threading.Lock()
 
 
 def _configuracion(base_datos=None):
+    """Construye la configuración de conexión MySQL desde las variables de entorno."""
     base = base_datos or os.getenv("MYSQL_DATABASE", "apuestas_analitica_multiusuario")
     if not re.fullmatch(r"[A-Za-z0-9_]+", base):
         raise ValueError("MYSQL_DATABASE solo admite letras, números y guion bajo.")
@@ -30,6 +31,7 @@ def _configuracion(base_datos=None):
 
 
 def _obtener_pool(base_datos=None):
+    """Obtiene o crea el pool de conexiones correspondiente a la base de datos."""
     base, configuracion = _configuracion(base_datos)
     clave = (base, configuracion["host"], configuracion["port"], configuracion["user"])
     with _lock:
@@ -59,6 +61,7 @@ def crear_conexion_mysql(base_datos=None):
 
 @contextmanager
 def conexion_mysql(base_datos=None):
+    """Proporciona una conexión MySQL y garantiza su cierre al terminar."""
     conexion = crear_conexion_mysql(base_datos)
     try:
         yield conexion

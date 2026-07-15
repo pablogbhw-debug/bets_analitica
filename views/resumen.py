@@ -15,6 +15,7 @@ from views.componentes import dinero, tabla_financiera
 
 
 def mostrar(casas):
+    """Muestra la vista de resumen y gestiona sus interacciones."""
     st.header("📊 Resumen financiero y de riesgo")
     st.caption("Primero revisa tu balance, el nivel de riesgo y la posibilidad real de retirar.")
     df, resultado = analitica.analizar_rendimiento_psicologico()

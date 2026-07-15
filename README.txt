@@ -1,8 +1,5 @@
-WEB APP ANALIZADORA DE INVERSIONES Y CONTROL DE BONOS
-Proyecto Final - Lenguajes de Programación - UTP
-
 OBJETIVO
-Funcionar como una bitácora simple de Betano, Inkabet y Te Apuesto. El usuario registra recargas,
+Funcionar como una bitácora para una o mas casas de apuesatas. El usuario registra recargas,
 apuestas terminadas y retiros; el sistema calcula indicadores y muestra alertas. No predice
 resultados ni garantiza ganancias.
 
@@ -19,7 +16,7 @@ Todas las entidades financieras incluyen `usuario_id` y llaves foráneas hacia `
 Cada consulta filtra el usuario autenticado; casas, configuración, apuestas, movimientos,
 saldos y analítica no se comparten entre cuentas.
 
-EVIDENCIAS DEL SÍLABO
+ESTRUCTURA Y FUNCIONALIDADES
 - Estructurado: flujo de módulos, formularios, if/elif/else y bucles for.
 - Funcional: funciones de transformación, filtros y cálculos en controllers/.
 - POO: herencia, __init__, self y super() en models/entidades.py.
@@ -74,7 +71,7 @@ ALERTAS
 
 INSTALACIÓN Y EJECUCIÓN
 1. pip install -r requirements.txt
-2. Copiar `.env.example` como `.env` y configurar las credenciales MySQL.
+2. Configurar las credenciales MySQL en el archivo `.env`.
 3. El usuario indicado debe poder crear la base si todavía no existe.
 4. streamlit run app.py
 
@@ -84,3 +81,11 @@ python -m unittest -v
 
 Las pruebas verifican saldos, apuestas pendientes, anulaciones, bonos, retiros, rollover,
 alertas de ilusión y creación de los tres activos predeterminados.
+
+ESTRUCTURA VARIABLE DE ENTORNO
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_USER=usuario_mysql
+MYSQL_PASSWORD=contraseña_mysql
+MYSQL_DATABASE=nombre_base_datos
+MYSQL_POOL_SIZE=8

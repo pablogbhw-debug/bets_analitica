@@ -6,6 +6,7 @@ from views.componentes import dinero, guardar_mensaje_y_limpiar
 
 
 def mostrar(casas):
+    """Muestra la vista de pendientes y gestiona sus interacciones."""
     st.header("Gestionar apuestas pendientes")
     pendientes = obtener_apuestas("PENDIENTE")
     if not pendientes:

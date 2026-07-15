@@ -5,6 +5,7 @@ from models.database import obtener_apuestas
 from controllers.analitica_apuesta import calcular_retorno_potencial
 
 def resumen_apuestas_pendientes():
+    """Resume el capital expuesto y el retorno potencial de las apuestas pendientes."""
     pendientes = obtener_apuestas("PENDIENTE")
     montos = np.array([float(a["monto"]) for a in pendientes], dtype=float)
     retornos = np.array([float(a["monto"]) * float(a["cuota"]) for a in pendientes], dtype=float)

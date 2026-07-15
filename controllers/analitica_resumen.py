@@ -14,6 +14,7 @@ UMBRAL_ROI_SEGURO = -0.10
 UMBRAL_CONCENTRACION = 0.70
 
 def analizar_rendimiento_psicologico():
+    """Analiza resultados financieros y patrones de comportamiento para generar alertas."""
     historial = obtener_historial_completo()
     casas = obtener_resumen_casas()
     df = _apuestas_liquidadas()

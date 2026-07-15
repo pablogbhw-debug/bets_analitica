@@ -11,13 +11,13 @@ from controllers.transacciones import (
     recalcular_rollover_casa,
 )
 from views.autenticacion import mostrar_autenticacion
-from views.apuesta.apuesta import mostrar as mostrar_apuesta
-from views.casas.casas import mostrar as mostrar_casas
-from views.historial.historial import mostrar as mostrar_historial
-from views.pendientes.pendientes import mostrar as mostrar_pendientes
-from views.recarga.recarga import mostrar as mostrar_recarga
-from views.resumen.resumen import mostrar as mostrar_resumen
-from views.retiro.retiro import mostrar as mostrar_retiro
+from views.apuesta import mostrar as mostrar_apuesta
+from views.casas import mostrar as mostrar_casas
+from views.historial import mostrar as mostrar_historial
+from views.pendientes import mostrar as mostrar_pendientes
+from views.recarga import mostrar as mostrar_recarga
+from views.resumen import mostrar as mostrar_resumen
+from views.retiro import mostrar as mostrar_retiro
 
 st.set_page_config(page_title="Bitácora de apuestas", layout="wide")
 

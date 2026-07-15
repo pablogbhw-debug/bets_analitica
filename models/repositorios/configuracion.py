@@ -6,10 +6,12 @@ from models.repositorios.conexion import ZONA_LOCAL, obtener_conexion, obtener_u
 
 
 def _asegurar_configuracion(conn, usuario_id):
+    """Crea la configuración preventiva predeterminada cuando aún no existe."""
     conn.execute("INSERT IGNORE INTO configuracion_control (usuario_id) VALUES (?)", (usuario_id,))
 
 
 def obtener_configuracion():
+    """Consulta los límites y controles preventivos del usuario."""
     usuario_id = obtener_usuario_actual()
     with obtener_conexion() as conn:
         _asegurar_configuracion(conn, usuario_id)
@@ -20,6 +22,7 @@ def obtener_configuracion():
 
 def actualizar_configuracion(limite_deposito_diario, limite_apuesta_diario,
                              limite_apuesta_individual, limite_perdida_semanal, modo_estricto):
+    """Guarda los límites personales y el modo de control preventivo."""
     usuario_id = obtener_usuario_actual()
     valores = list(map(float, (limite_deposito_diario, limite_apuesta_diario,
                               limite_apuesta_individual, limite_perdida_semanal)))
@@ -33,6 +36,7 @@ def actualizar_configuracion(limite_deposito_diario, limite_apuesta_diario,
 
 
 def activar_pausa(horas=24):
+    """Impide temporalmente nuevas operaciones durante la cantidad de horas indicada."""
     usuario_id = obtener_usuario_actual()
     hasta = (datetime.now(timezone.utc) + timedelta(hours=int(horas))).strftime("%Y-%m-%d %H:%M:%S")
     with obtener_conexion() as conn:
@@ -43,6 +47,7 @@ def activar_pausa(horas=24):
 
 
 def estado_pausa():
+    """Informa si la pausa preventiva continúa activa y cuándo termina."""
     config = obtener_configuracion()
     if not config["pausa_hasta"]:
         return False, None
@@ -53,6 +58,7 @@ def estado_pausa():
 
 
 def _suma_periodo(conn, usuario_id, tipos, desde):
+    """Suma movimientos específicos del usuario desde una fecha determinada."""
     marcas = ",".join("?" for _ in tipos)
     fila = conn.execute(
         f"SELECT COALESCE(SUM(monto),0) FROM historial_transacciones "
@@ -63,6 +69,7 @@ def _suma_periodo(conn, usuario_id, tipos, desde):
 
 
 def evaluar_limites(tipo, monto):
+    """Evalúa una operación contra límites personales y pausas preventivas."""
     usuario_id = obtener_usuario_actual()
     monto = float(monto)
     config = obtener_configuracion()

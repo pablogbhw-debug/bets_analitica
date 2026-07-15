@@ -10,6 +10,4 @@ Responsabilidad MVC: recibir acciones de las vistas, aplicar reglas del negocio 
 - `analitica_recarga.py`: protección ante pérdidas y límites de recarga.
 - `analitica_pendientes.py`: capital expuesto y ganancia potencial pendiente.
 
-Mapeo del sílabo: funciones, condicionales, bucles, listas, diccionarios, validaciones, manejo de excepciones, Pandas y vectorización NumPy (`sum`, `mean`, máscaras, `cumsum`, agrupación y drawdown).
-
 Las reglas conservadas incluyen billeteras separadas, rollover, cuota mínima, retiro mínimo, apuestas pendientes, anulaciones, cash out, bono, límites informativos y alertas de inversión.

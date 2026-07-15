@@ -10,11 +10,13 @@ from controllers.autenticacion import (
 
 
 def _guardar_sesion(usuario):
+    """Guarda el usuario y el token autenticado en el estado de Streamlit."""
     st.session_state["usuario"] = usuario
     st.query_params["sesion"] = iniciar_sesion_persistente(usuario)
 
 
 def mostrar_autenticacion():
+    """Muestra los formularios para iniciar sesión o crear una cuenta."""
     st.title("Bitácora analizadora de apuestas")
     st.caption("Inicia sesión con tu correo o crea una cuenta para continuar.")
     columna, _ = st.columns([1, 1])

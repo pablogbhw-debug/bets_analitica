@@ -8,6 +8,7 @@ from models.repositorios.conexion import obtener_conexion, obtener_usuario_actua
 def registrar_casa_apuesta(id_casa, nombre, minimo_retiro=50, rollover_deposito=1,
                             rollover_bono=1, cuota_minima_rollover=1.01,
                             deportes="Futbol,Baloncesto,Tenis"):
+    """Crea una casa de apuestas con reglas y saldos independientes."""
     usuario_id = obtener_usuario_actual()
     id_casa, nombre = id_casa.upper().strip(), nombre.strip()
     if not id_casa or not nombre:
@@ -47,6 +48,7 @@ def inicializar_casas_predeterminadas(forzar=False):
 
 
 def eliminar_casa_apuesta(id_casa):
+    """Elimina una casa únicamente cuando no tiene operaciones asociadas."""
     usuario_id = obtener_usuario_actual()
     id_casa = id_casa.upper().strip()
     with obtener_conexion() as conn:
@@ -98,6 +100,7 @@ def reiniciar_datos_conservando_casas():
 
 def actualizar_casa(id_casa, minimo_retiro, rollover_deposito, rollover_bono,
                     cuota_minima_rollover, deportes):
+    """Actualiza las reglas financieras y deportivas de una casa."""
     usuario_id = obtener_usuario_actual()
     valores = [float(minimo_retiro), float(rollover_deposito), float(rollover_bono),
                float(cuota_minima_rollover)]
@@ -111,6 +114,7 @@ def actualizar_casa(id_casa, minimo_retiro, rollover_deposito, rollover_bono,
 
 
 def obtener_resumen_casas():
+    """Devuelve los saldos y reglas de todas las casas del usuario."""
     usuario_id = obtener_usuario_actual()
     with obtener_conexion() as conn:
         return [dict(f) for f in conn.execute(
@@ -120,6 +124,7 @@ def obtener_resumen_casas():
 
 
 def obtener_casa(id_casa):
+    """Busca una casa específica perteneciente al usuario actual."""
     usuario_id = obtener_usuario_actual()
     with obtener_conexion() as conn:
         fila = conn.execute(

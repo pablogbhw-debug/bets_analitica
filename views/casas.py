@@ -10,6 +10,7 @@ from views.componentes import guardar_mensaje_y_limpiar, selector_casa
 
 
 def mostrar(casas):
+    """Muestra la vista de casas y gestiona sus interacciones."""
     st.header("Configurar casas de apuestas")
     tab1, tab2, tab3, tab4 = st.tabs([
         "Editar casa", "Agregar casa", "Eliminar casa", "Reiniciar datos"

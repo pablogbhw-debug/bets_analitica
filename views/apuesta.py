@@ -8,6 +8,7 @@ from views.componentes import dinero, guardar_mensaje_y_limpiar, selector_casa
 
 
 def mostrar(casas):
+    """Muestra la vista de apuesta y gestiona sus interacciones."""
     st.header("Registrar una apuesta")
     casa = selector_casa(casas, "casa_apuesta")
     recomendacion = analitica.recomendar_monto_bitacora(casa["id"])

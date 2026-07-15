@@ -14,6 +14,6 @@ Responsabilidad MVC: representar el dominio y encapsular la persistencia, sin im
 - `usuarios.py`: alta y consulta de cuentas con restricción única sobre el correo.
 - `schema_mysql.sql`: definición relacional de las entidades persistentes para MySQL.
 
-Mapeo del sílabo: clases, herencia, constructores, encapsulamiento, tipos de datos, relaciones, claves primarias y foráneas, excepciones y persistencia transaccional.
+Mapeo: clases, herencia, constructores, encapsulamiento, tipos de datos, relaciones, claves primarias y foráneas, excepciones y persistencia transaccional.
 
 Variables MySQL: `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_USER`, `MYSQL_PASSWORD` y `MYSQL_DATABASE`.

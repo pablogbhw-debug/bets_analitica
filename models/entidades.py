@@ -11,6 +11,7 @@ def normalizar_campos_texto(campos):
 class Transaccion:
     """Clase padre de los movimientos auditables del portafolio."""
     def __init__(self, id_casa: str, monto: float, tipo_saldo: str):
+        """Inicializa la instancia con los datos necesarios para su funcionamiento."""
         self.id_casa = id_casa.upper().strip()
         self.monto = float(monto)
         self.tipo_saldo = tipo_saldo.upper().strip()
@@ -22,6 +23,7 @@ class RegistroApuesta(Transaccion):
     """Clase hija especializada en una inversión deportiva."""
     def __init__(self, id_casa, monto, tipo_saldo, cuota, deporte, liga, evento,
                  mercado, seleccion, fecha_evento):
+        """Inicializa la instancia con los datos necesarios para su funcionamiento."""
         super().__init__(id_casa, monto, tipo_saldo)
         self.cuota = float(cuota)
         campos = normalizar_campos_texto([deporte, liga, evento, mercado, seleccion])

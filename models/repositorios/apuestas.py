@@ -12,6 +12,7 @@ from models.repositorios.historial import recalcular_rollover_casa
 
 def registrar_apuesta(id_casa, deporte, liga, evento, mercado, seleccion, fecha_evento,
                       monto, cuota, tipo_saldo):
+    """Registra una apuesta y aplica sus efectos financieros según el resultado."""
     usuario_id = obtener_usuario_actual()
     monto, cuota = float(monto), float(cuota)
     if cuota <= 1 or monto <= 0:
@@ -160,6 +161,7 @@ def registrar_apuesta_bitacora(id_casa, deporte, liga, evento, mercado, seleccio
 
 
 def obtener_apuestas(estado=None):
+    """Consulta las apuestas del usuario y permite filtrarlas por estado."""
     usuario_id = obtener_usuario_actual()
     consulta = ("SELECT a.*,c.nombre_casa FROM apuestas a JOIN casas_apuestas c "
                 "ON c.usuario_id=a.usuario_id AND c.id=a.id_casa WHERE a.usuario_id=?")
@@ -173,6 +175,7 @@ def obtener_apuestas(estado=None):
 
 def editar_apuesta_bitacora(apuesta_id, deporte, liga, evento, mercado, seleccion,
                             fecha_evento, cuota, tipo_saldo):
+    """Actualiza los datos de una apuesta y concilia nuevamente sus movimientos."""
     usuario_id = obtener_usuario_actual()
     """Corrige los datos de una apuesta sin recalcular su resultado histórico."""
     textos = [str(x).strip() for x in (deporte, liga, evento, mercado, seleccion)]
@@ -251,6 +254,7 @@ def eliminar_apuesta_bitacora(apuesta_id):
 
 
 def resolver_apuesta(apuesta_id, resultado, monto_cashout=0):
+    """Liquida una apuesta pendiente y actualiza saldos, retorno y rollover."""
     usuario_id = obtener_usuario_actual()
     resultado = resultado.upper().strip()
     if resultado not in {"GANADA", "PERDIDA", "ANULADA", "CASH_OUT"}:

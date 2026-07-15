@@ -5,6 +5,7 @@ from views.componentes import dinero, guardar_mensaje_y_limpiar, selector_casa
 
 
 def mostrar(casas):
+    """Muestra la vista de retiro y gestiona sus interacciones."""
     st.header("Registrar un retiro")
     casa = selector_casa(casas, "casa_retiro")
     diagnostico = diagnosticar_ciclo(casa)
