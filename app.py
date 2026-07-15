@@ -2,7 +2,9 @@
 
 import streamlit as st
 
+from controllers.autenticacion import cerrar_sesion, restaurar_sesion
 from controllers.transacciones import (
+    establecer_usuario_actual,
     inicializar_casas_predeterminadas,
     inicializar_db,
     obtener_resumen_casas,
@@ -31,12 +33,13 @@ MODULOS = {
 
 
 @st.cache_resource
-def inicializar_sistema():
-    """Ejecuta migraciones y preparación financiera una sola vez por proceso."""
+def inicializar_sistema(usuario_id=None):
+    """Prepara una sola vez el almacén global o el privado de un usuario."""
     inicializar_db()
-    inicializar_casas_predeterminadas()
-    for casa in obtener_resumen_casas():
-        recalcular_rollover_casa(casa["id"])
+    if usuario_id is not None:
+        inicializar_casas_predeterminadas()
+        for casa in obtener_resumen_casas():
+            recalcular_rollover_casa(casa["id"])
     return True
 
 
@@ -60,14 +63,26 @@ def mostrar_aplicacion(usuario):
     )
     st.sidebar.caption(f"Sesión: {usuario['correo']}")
     if st.sidebar.button("Cerrar sesión", width="stretch"):
+        cerrar_sesion(st.query_params.get("sesion"))
+        st.query_params.clear()
         st.session_state.pop("usuario", None)
         st.rerun()
         return
     MODULOS[modulo](casas)
 
 
-inicializar_sistema()
+establecer_usuario_actual(None)
+inicializar_sistema(None)
 usuario_actual = st.session_state.get("usuario")
+if usuario_actual is None:
+    usuario_actual = restaurar_sesion(st.query_params.get("sesion"))
+    if usuario_actual:
+        st.session_state["usuario"] = usuario_actual
+    elif "sesion" in st.query_params:
+        st.query_params.clear()
+establecer_usuario_actual(usuario_actual["id"] if usuario_actual else None)
+if usuario_actual:
+    inicializar_sistema(usuario_actual["id"])
 if usuario_actual is None:
     mostrar_autenticacion()
 else:

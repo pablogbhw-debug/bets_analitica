@@ -74,7 +74,7 @@ def tabla_financiera(tabla):
         )
     return estilo
 
-def selector_casa(casas, clave, etiqueta="Casa de apuestas"):
+def selector_casa(casas, clave, etiqueta="Casa de apuestas", detener_si_vacia=True):
     opciones = {f"{c['nombre_casa']} ({c['id']})": c for c in casas}
     seleccion = st.selectbox(
         etiqueta, list(opciones), index=None,
@@ -82,5 +82,7 @@ def selector_casa(casas, clave, etiqueta="Casa de apuestas"):
     )
     if seleccion is None:
         st.info("Selecciona la casa para continuar. Cada movimiento se registra por separado.")
-        st.stop()
+        if detener_si_vacia:
+            st.stop()
+        return None
     return opciones[seleccion]

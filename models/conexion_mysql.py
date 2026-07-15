@@ -13,21 +13,21 @@ _pools = {}
 _lock = threading.Lock()
 
 
-def _configuracion():
-    base = os.getenv("MYSQL_DATABASE", "apuestas_analitica")
+def _configuracion(base_datos=None):
+    base = base_datos or os.getenv("MYSQL_DATABASE", "apuestas_analitica")
     if not re.fullmatch(r"[A-Za-z0-9_]+", base):
         raise ValueError("MYSQL_DATABASE solo admite letras, números y guion bajo.")
     return base, {
         "host": os.getenv("MYSQL_HOST", "localhost"),
         "port": int(os.getenv("MYSQL_PORT", "3306")),
         "user": os.getenv("MYSQL_USER", "root"),
-        "password": os.getenv("MYSQL_PASSWORD", "pablogirao"),
+        "password": os.getenv("MYSQL_PASSWORD", "pwx1008184"),
         "autocommit": False,
     }
 
 
-def _obtener_pool():
-    base, configuracion = _configuracion()
+def _obtener_pool(base_datos=None):
+    base, configuracion = _configuracion(base_datos)
     clave = (base, configuracion["host"], configuracion["port"], configuracion["user"])
     with _lock:
         if clave not in _pools:
@@ -49,14 +49,14 @@ def _obtener_pool():
         return _pools[clave]
 
 
-def crear_conexion_mysql():
+def crear_conexion_mysql(base_datos=None):
     """Obtiene una conexión del pool; close() la devuelve para reutilizarla."""
-    return _obtener_pool().get_connection()
+    return _obtener_pool(base_datos).get_connection()
 
 
 @contextmanager
-def conexion_mysql():
-    conexion = crear_conexion_mysql()
+def conexion_mysql(base_datos=None):
+    conexion = crear_conexion_mysql(base_datos)
     try:
         yield conexion
         conexion.commit()

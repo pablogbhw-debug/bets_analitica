@@ -1,5 +1,7 @@
 """Conexión, fechas e inicialización del esquema MySQL."""
 
+import os
+from contextvars import ContextVar
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
@@ -8,6 +10,32 @@ from models.mysql_adapter import ConexionMySQL
 
 MINIMO_RETIRO = 50.0
 ZONA_LOCAL = ZoneInfo("America/Lima")
+_usuario_actual = ContextVar("usuario_actual", default=None)
+
+
+def establecer_usuario_actual(usuario_id):
+    """Selecciona el almacén privado usado durante la ejecución actual."""
+    if usuario_id is None:
+        _usuario_actual.set(None)
+        return
+    usuario_id = int(usuario_id)
+    if usuario_id <= 0:
+        raise ValueError("El identificador de usuario no es válido.")
+    _usuario_actual.set(usuario_id)
+
+
+def obtener_usuario_actual():
+    return _usuario_actual.get()
+
+
+def _base_datos_global():
+    return os.getenv("MYSQL_DATABASE", "apuestas_analitica")
+
+
+def _base_datos_actual():
+    usuario_id = obtener_usuario_actual()
+    base = _base_datos_global()
+    return f"{base}_usuario_{usuario_id}" if usuario_id is not None else base
 
 
 def ahora_utc_sql():
@@ -37,8 +65,23 @@ def normalizar_fecha_evento(valor):
         raise ValueError("La fecha del evento debe tener el formato AAAA-MM-DD.") from None
 
 
+@contextmanager
 def obtener_conexion():
-    conn = ConexionMySQL()
+    conn = ConexionMySQL(_base_datos_actual())
+    try:
+        yield conn
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+
+
+@contextmanager
+def obtener_conexion_global():
+    """Conecta al almacén global, reservado para las cuentas de acceso."""
+    conn = ConexionMySQL(_base_datos_global())
     try:
         yield conn
         conn.commit()
@@ -70,6 +113,15 @@ def inicializar_db():
                 password_hash VARCHAR(60) NOT NULL,
                 fecha_registro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 activo BOOLEAN NOT NULL DEFAULT TRUE
+            ) ENGINE=InnoDB
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS sesiones_usuario (
+                token_hash CHAR(64) PRIMARY KEY,
+                usuario_id BIGINT NOT NULL,
+                creada TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                expira DATETIME NOT NULL,
+                FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
             ) ENGINE=InnoDB
         """)
         cursor.execute("""

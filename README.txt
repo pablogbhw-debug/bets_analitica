@@ -11,10 +11,12 @@ ARQUITECTURA MVC
 2. controllers/: casos de uso, validaciones, rollover y analítica Pandas/NumPy.
 3. views/: formularios, tablas, métricas, gráficos y alertas de Streamlit.
 4. app.py: composición e inicio; no contiene reglas financieras.
-5. database.py, modelos.py y analitica.py: fachadas de compatibilidad.
+5. test_sistema.py: pruebas de integración que importan directamente models/ y controllers/.
 
 MySQL usa MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD y MYSQL_DATABASE.
 MySQL es el único motor de persistencia de la aplicación.
+Cada cuenta usa un almacén MySQL privado derivado de MYSQL_DATABASE y su id de usuario;
+casas, configuración, apuestas, movimientos, saldos y analítica no se comparten.
 
 EVIDENCIAS DEL SÍLABO
 - Estructurado: flujo de módulos, formularios, if/elif/else y bucles for.
@@ -31,6 +33,7 @@ EVIDENCIAS DEL SÍLABO
 FLUJO PRINCIPAL
 - Registro de usuario con correo único y contraseña protegida mediante bcrypt.
 - Inicio y cierre de sesión; el resto de la aplicación requiere autenticación.
+- La sesión se restaura al recargar la página mediante una credencial temporal revocable.
 - Dashboard con estadísticas, alertas, sugerencia de recarga, máximo por jugada,
   disponibilidad de retiros y movimientos recientes.
 - Tarjetas grandes por casa para decidir retiros según saldo, mínimo, faltante y rollover.

@@ -2,8 +2,13 @@ import os
 import unittest
 from datetime import date
 
-import database
-import analitica
+from controllers import (
+    analitica_apuesta,
+    analitica_pendientes,
+    analitica_recarga,
+    analitica_resumen,
+)
+from models import database
 
 
 @unittest.skipUnless(
@@ -74,10 +79,24 @@ class SistemaApuestasTest(unittest.TestCase):
 
     def setUp(self):
         os.environ["MYSQL_DATABASE"] = os.environ["MYSQL_TEST_DATABASE"]
+        database.establecer_usuario_actual(1)
         database.inicializar_db()
         database.reiniciar_datos_conservando_casas()
         database.registrar_casa_apuesta("TEST", "Casa Test", 20, 1, 2, 1.20, "Fútbol,Tenis")
         database.actualizar_configuracion(500, 200, 50, 100, True)
+
+    def test_datos_financieros_son_independientes_por_usuario(self):
+        database.registrar_recarga_bitacora("TEST", 25)
+
+        database.establecer_usuario_actual(2)
+        database.inicializar_db()
+        database.inicializar_casas_predeterminadas(forzar=True)
+        self.assertIsNone(database.obtener_casa("TEST"))
+        self.assertEqual(database.obtener_historial_completo(), [])
+
+        database.establecer_usuario_actual(1)
+        self.assertEqual(database.obtener_casa("TEST")["saldo_deposito"], 25)
+        self.assertEqual(len(database.obtener_historial_completo()), 1)
 
     def test_apuesta_pendiente_y_ganada(self):
         database.registrar_movimiento_bd("TEST", "RECARGA", 100)
@@ -145,7 +164,7 @@ class SistemaApuestasTest(unittest.TestCase):
                 date.today(), monto, cuota, "DEPOSITO"
             )
             database.resolver_apuesta(apuesta_id, resultado)
-        _, metricas = analitica.analizar_rendimiento_psicologico()
+        _, metricas = analitica_resumen.analizar_rendimiento_psicologico()
         codigos = [alerta["codigo"] for alerta in metricas["mensajes_riesgo"]]
         self.assertEqual(metricas["total_apostado"], 70)
         self.assertEqual(metricas["apuestas_ganadas"], 2)
@@ -174,12 +193,12 @@ class SistemaApuestasTest(unittest.TestCase):
             "TEST", "Fútbol", "Liga", "A vs B", "Ganador", "A", date.today(),
             100, 2, "DEPOSITO", "PERDIDA"
         )
-        recomendacion = analitica.recomendar_monto_bitacora("TEST")
+        recomendacion = analitica_apuesta.recomendar_monto_bitacora("TEST")
         self.assertLessEqual(recomendacion["monto"], 50)
 
     def test_recomendacion_no_supera_saldo_disponible(self):
         database.registrar_recarga_bitacora("TEST", 8)
-        recomendacion = analitica.recomendar_monto_bitacora("TEST")
+        recomendacion = analitica_apuesta.recomendar_monto_bitacora("TEST")
         self.assertLessEqual(recomendacion["monto"], 8)
 
     def test_no_recomienda_recarga_cuando_hay_perdida(self):
@@ -188,7 +207,7 @@ class SistemaApuestasTest(unittest.TestCase):
             "TEST", "Fútbol", "Liga", "A vs B", "Ganador", "A", date.today(),
             30, 2, "DEPOSITO", "PERDIDA"
         )
-        recomendacion = analitica.recomendar_recarga_bitacora()
+        recomendacion = analitica_recarga.recomendar_recarga_bitacora()
         self.assertEqual(recomendacion["sugerida"], 0)
         self.assertEqual(recomendacion["maxima"], 0)
 
@@ -198,7 +217,7 @@ class SistemaApuestasTest(unittest.TestCase):
             "TEST", "Fútbol", "Liga", "A vs B", "BITACORA", "A",
             date.today(), 10, 2, "DEPOSITO", "PERDIDA"
         )
-        proteccion = analitica.evaluar_proteccion_perdidas("TEST")
+        proteccion = analitica_recarga.evaluar_proteccion_perdidas("TEST")
         self.assertTrue(proteccion["requiere_confirmacion"] or proteccion["bloqueada"])
         self.assertEqual(proteccion["perdida_casa"], 10)
 
@@ -209,8 +228,8 @@ class SistemaApuestasTest(unittest.TestCase):
                 "TEST", "Fútbol", "Liga", f"Evento {indice}", "BITACORA", "A",
                 date.today(), 10, 2, "DEPOSITO", "PERDIDA"
             )
-        proteccion = analitica.evaluar_proteccion_perdidas("TEST")
-        recomendacion = analitica.recomendar_monto_bitacora("TEST")
+        proteccion = analitica_recarga.evaluar_proteccion_perdidas("TEST")
+        recomendacion = analitica_apuesta.recomendar_monto_bitacora("TEST")
         self.assertTrue(proteccion["bloqueada"])
         self.assertGreaterEqual(proteccion["racha_perdidas"], 3)
         self.assertEqual(recomendacion["monto"], 0)
@@ -274,15 +293,15 @@ class SistemaApuestasTest(unittest.TestCase):
             "TEST", "Fútbol", "Liga", "A vs B", "Detalle", "A", date.today(),
             30, 2, "DEPOSITO", "PERDIDA"
         )
-        resumen = analitica.resumen_financiero_casa("TEST")
+        resumen = analitica_recarga.resumen_financiero_casa("TEST")
         self.assertEqual(resumen["total_recargado"], 100)
         self.assertEqual(resumen["total_bonos"], 20)
         self.assertEqual(resumen["monto_no_retirable"], 90)
         self.assertEqual(resumen["perdida_acumulada"], 30)
 
     def test_calcula_retorno_potencial_antes_de_guardar(self):
-        deposito = analitica.calcular_retorno_potencial(20, 2.5, "DEPOSITO")
-        bono = analitica.calcular_retorno_potencial(20, 2.5, "BONO")
+        deposito = analitica_apuesta.calcular_retorno_potencial(20, 2.5, "DEPOSITO")
+        bono = analitica_apuesta.calcular_retorno_potencial(20, 2.5, "BONO")
         self.assertEqual(deposito["retorno_total"], 50)
         self.assertEqual(deposito["ganancia_neta"], 30)
         self.assertEqual(deposito["retirable_estimado"], 50)
@@ -314,7 +333,7 @@ class SistemaApuestasTest(unittest.TestCase):
         self.assertEqual(apuesta["estado"], "CASH_OUT")
         self.assertEqual(apuesta["retorno"], 12)
         self.assertEqual(database.obtener_casa("TEST")["saldo_retirable"], 12)
-        _, metricas = analitica.analizar_rendimiento_psicologico()
+        _, metricas = analitica_resumen.analizar_rendimiento_psicologico()
         self.assertEqual(metricas["balance_neto_real"], -8)
         resumen = metricas["por_casa"].iloc[0]
         self.assertEqual(resumen["cashout_perdida"], 1)
@@ -327,7 +346,7 @@ class SistemaApuestasTest(unittest.TestCase):
             20, 2, "SALDO", "PENDIENTE"
         )
         database.resolver_apuesta(apuesta_id, "CASH_OUT", 20)
-        _, metricas = analitica.analizar_rendimiento_psicologico()
+        _, metricas = analitica_resumen.analizar_rendimiento_psicologico()
         resumen = metricas["por_casa"].iloc[0]
         self.assertEqual(metricas["resultado_apuestas"], 0)
         self.assertEqual(resumen["cashout_neutros"], 1)
@@ -335,14 +354,14 @@ class SistemaApuestasTest(unittest.TestCase):
 
     def test_bono_no_infla_balance_de_dinero_propio(self):
         database.registrar_recarga_bitacora("TEST", 20, 80)
-        _, metricas = analitica.analizar_rendimiento_psicologico()
+        _, metricas = analitica_resumen.analizar_rendimiento_psicologico()
         # Se necesita una apuesta liquidada para activar el análisis.
         if not isinstance(metricas, dict):
             database.registrar_apuesta_bitacora(
                 "TEST", "Fútbol", "Liga", "A vs B", "BITACORA", "A",
                 date.today(), 1, 2, "BONO", "PERDIDA"
             )
-            _, metricas = analitica.analizar_rendimiento_psicologico()
+            _, metricas = analitica_resumen.analizar_rendimiento_psicologico()
         self.assertEqual(metricas["saldo_bonos"], 79)
         self.assertEqual(metricas["balance_neto_real"], 0)
 
@@ -364,7 +383,7 @@ class SistemaApuestasTest(unittest.TestCase):
         )
         with database.obtener_conexion() as conn:
             conn.execute("UPDATE apuestas SET monto_conciliado=0 WHERE id=?", (apuesta_id,))
-        auditoria = analitica.auditar_conciliacion_historial()
+        auditoria = analitica_resumen.auditar_conciliacion_historial()
         self.assertFalse(auditoria["confiable_saldos"])
         self.assertEqual(auditoria["monto_sin_conciliar"], 20)
 
@@ -384,15 +403,15 @@ class SistemaApuestasTest(unittest.TestCase):
         self.assertEqual(casa["saldo_bono"], 50)
 
     def test_cotejo_advierte_si_falta_registrar_saldo(self):
-        cotejo = analitica.verificar_saldo_para_apuesta("TEST", "SALDO", 20)
+        cotejo = analitica_apuesta.verificar_saldo_para_apuesta("TEST", "SALDO", 20)
         self.assertFalse(cotejo["suficiente"])
         self.assertEqual(cotejo["faltante"], 20)
         self.assertIn("Verifica si olvidaste registrar", cotejo["mensaje"])
 
     def test_cotejo_separa_saldo_de_bono(self):
         database.registrar_recarga_bitacora("TEST", 10, 30)
-        saldo = analitica.verificar_saldo_para_apuesta("TEST", "SALDO", 20)
-        bono = analitica.verificar_saldo_para_apuesta("TEST", "BONO", 20)
+        saldo = analitica_apuesta.verificar_saldo_para_apuesta("TEST", "SALDO", 20)
+        bono = analitica_apuesta.verificar_saldo_para_apuesta("TEST", "BONO", 20)
         self.assertFalse(saldo["suficiente"])
         self.assertTrue(bono["suficiente"])
         self.assertEqual(saldo["disponible"], 10)
@@ -404,7 +423,7 @@ class SistemaApuestasTest(unittest.TestCase):
             "TEST", "Fútbol", "Liga", "A vs B", "BITACORA", "Detalle", date.today(),
             25, 3, "DEPOSITO", "PENDIENTE"
         )
-        resumen = analitica.resumen_apuestas_pendientes()
+        resumen = analitica_pendientes.resumen_apuestas_pendientes()
         self.assertEqual(resumen["cantidad"], 1)
         self.assertEqual(resumen["capital_en_riesgo"], 25)
         self.assertEqual(resumen["retorno_potencial"], 75)
@@ -416,7 +435,7 @@ class SistemaApuestasTest(unittest.TestCase):
             "TEST", "Fútbol", "Liga", "A vs B", "BITACORA", "A",
             date.today(), 20, 2, "SALDO", "PENDIENTE"
         )
-        cotejo = analitica.verificar_saldo_para_apuesta("TEST", "SALDO", 20)
+        cotejo = analitica_apuesta.verificar_saldo_para_apuesta("TEST", "SALDO", 20)
         self.assertEqual(cotejo["disponible"], 10)
         self.assertEqual(cotejo["reservado_pendientes"], 20)
         with self.assertRaisesRegex(ValueError, "Saldo insuficiente"):

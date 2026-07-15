@@ -4,7 +4,13 @@ import re
 
 import bcrypt
 
-from models.usuarios import buscar_usuario_por_correo, crear_usuario
+from models.usuarios import (
+    buscar_usuario_por_correo,
+    buscar_usuario_por_sesion,
+    crear_sesion_usuario,
+    crear_usuario,
+    eliminar_sesion_usuario,
+)
 
 
 PATRON_CORREO = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
@@ -46,3 +52,15 @@ def autenticar_usuario(correo, password):
     if not usuario or not usuario["activo"] or not coincide:
         raise ValueError("Correo o contraseña incorrectos.")
     return {"id": usuario["id"], "nombre": usuario["nombre"], "correo": usuario["correo"]}
+
+
+def iniciar_sesion_persistente(usuario):
+    return crear_sesion_usuario(usuario["id"])
+
+
+def restaurar_sesion(token):
+    return buscar_usuario_por_sesion(token)
+
+
+def cerrar_sesion(token):
+    eliminar_sesion_usuario(token)

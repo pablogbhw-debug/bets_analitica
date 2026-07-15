@@ -45,8 +45,8 @@ class CursorMySQL:
 
 
 class ConexionMySQL:
-    def __init__(self):
-        self._conexion = crear_conexion_mysql()
+    def __init__(self, base_datos=None):
+        self._conexion = crear_conexion_mysql(base_datos)
         self._cursores = []
 
     def cursor(self):

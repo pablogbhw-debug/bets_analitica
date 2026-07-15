@@ -2,7 +2,16 @@
 
 import streamlit as st
 
-from controllers.autenticacion import autenticar_usuario, registrar_usuario
+from controllers.autenticacion import (
+    autenticar_usuario,
+    iniciar_sesion_persistente,
+    registrar_usuario,
+)
+
+
+def _guardar_sesion(usuario):
+    st.session_state["usuario"] = usuario
+    st.query_params["sesion"] = iniciar_sesion_persistente(usuario)
 
 
 def mostrar_autenticacion():
@@ -18,7 +27,7 @@ def mostrar_autenticacion():
                 ingresar = st.form_submit_button("Ingresar", type="primary", width="stretch")
             if ingresar:
                 try:
-                    st.session_state["usuario"] = autenticar_usuario(correo, password)
+                    _guardar_sesion(autenticar_usuario(correo, password))
                     st.rerun()
                 except ValueError as error:
                     st.error(str(error))
@@ -35,7 +44,7 @@ def mostrar_autenticacion():
                     usuario = registrar_usuario(
                         nombre, correo_nuevo, password_nuevo, confirmacion
                     )
-                    st.session_state["usuario"] = usuario
+                    _guardar_sesion(usuario)
                     st.success("Cuenta creada correctamente.")
                     st.rerun()
                 except ValueError as error:
