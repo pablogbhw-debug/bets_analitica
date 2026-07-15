@@ -16,7 +16,7 @@ from views.componentes import dinero, tabla_financiera
 
 def mostrar(casas):
     """Muestra la vista de resumen y gestiona sus interacciones."""
-    st.header("📊 Resumen financiero y de riesgo")
+    st.header("Resumen financiero y de riesgo")
     st.caption("Primero revisa tu balance, el nivel de riesgo y la posibilidad real de retirar.")
     df, resultado = analitica.analizar_rendimiento_psicologico()
     auditoria = analitica.auditar_conciliacion_historial()
@@ -39,7 +39,7 @@ def mostrar(casas):
             "No interpretes el saldo, los bonos ni las analíticas como una posibilidad de recuperación."
         )
     with st.container(border=True):
-        st.markdown("### 💡 Recomendación principal")
+        st.markdown("### Recomendación principal")
         c1, c2, c3 = st.columns(3)
         c1.metric("Recarga sugerida", dinero(recarga["sugerida"]))
         c2.metric("Máximo de recarga", dinero(recarga["maxima"]))
@@ -48,12 +48,12 @@ def mostrar(casas):
             st.error(recarga["mensaje"])
         else:
             st.warning(recarga["mensaje"])
-    st.subheader("📌 Indicadores generales")
+    st.subheader("Indicadores generales")
     if df is None:
         st.info(resultado)
     else:
         tab_rentabilidad, tab_comportamiento, tab_capital = st.tabs([
-            "💰 Rentabilidad", "🧠 Comportamiento", "🏦 Capital"
+            "Rentabilidad", "Comportamiento", "Capital"
         ])
         with tab_rentabilidad:
             with st.container(border=True):
@@ -100,9 +100,9 @@ def mostrar(casas):
             else:
                 st.warning(mensaje)
 
-        st.subheader("📈 Evolución de ganancias y pérdidas")
+        st.subheader("Evolución de ganancias y pérdidas")
         st.line_chart(df, x="fecha", y="Balance_Acumulado")
-        st.subheader("🏠 Resultado por casa")
+        st.subheader("Resultado por casa")
         st.caption("El rendimiento anterior es descriptivo y no garantiza resultados futuros.")
         st.dataframe(tabla_financiera(resultado["por_casa"]), width="stretch", hide_index=True)
         if not auditoria["confiable_saldos"]:
@@ -110,7 +110,7 @@ def mostrar(casas):
             with st.expander("Ver apuestas sin conciliación completa"):
                 st.dataframe(tabla_financiera(pd.DataFrame(auditoria["apuestas"])),
                              width="stretch", hide_index=True)
-    st.subheader("🎯 Referencia para la próxima jugada")
+    st.subheader("Referencia para la próxima jugada")
     recomendaciones = []
     for casa in casas:
         recomendacion = recomendar_monto_bitacora(casa["id"])
@@ -138,7 +138,7 @@ def mostrar(casas):
         )
         columnas = ["id", "nombre_casa", "evento", "detalle_apuesta", "monto", "cuota", "fecha_evento"]
         st.dataframe(tabla_financiera(tabla_pendientes[columnas]), width="stretch", hide_index=True)
-    st.subheader("💳 Disponibilidad de retiro por casa")
+    st.subheader("Disponibilidad de retiro por casa")
     st.caption("Disponibilidad calculada con los saldos registrados en cada billetera.")
     if not auditoria["confiable_saldos"]:
         st.warning(
@@ -184,7 +184,7 @@ def mostrar(casas):
                     st.warning(diagnostico["recomendacion"])
     apuestas_recientes = obtener_apuestas()[:10]
     if apuestas_recientes:
-        st.subheader("🕘 Últimas apuestas registradas")
+        st.subheader("Últimas apuestas registradas")
         tabla_recientes = pd.DataFrame(apuestas_recientes).rename(
             columns={"seleccion": "detalle_apuesta"}
         )
