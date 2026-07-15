@@ -89,3 +89,6 @@ MYSQL_USER=usuario_mysql
 MYSQL_PASSWORD=contraseña_mysql
 MYSQL_DATABASE=nombre_base_datos
 MYSQL_POOL_SIZE=8
+
+EJECUTAR SCRIPT DE ACTUALIZACIÓN
+bash /opt/apuestas/scripts/actualizar_servidor.sh
